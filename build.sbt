@@ -25,4 +25,6 @@ libraryDependencies ++= List(
   "org.scalacheck" %% "scalacheck"          % scalacheckVersion % Test
 )
 
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+
 mainClass := Some("dragisak.zio.Main")

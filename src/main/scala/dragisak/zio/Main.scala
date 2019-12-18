@@ -8,6 +8,8 @@ import org.http4s.server.blaze._
 import org.http4s.implicits._
 import org.http4s.server.Router
 import zio.interop.catz._
+import io.circe.syntax._
+import org.http4s.circe._
 
 object Main extends App {
 
@@ -18,7 +20,8 @@ object Main extends App {
   import dsl._
 
   private val service: HttpRoutes[AppTask] = HttpRoutes.of[AppTask] {
-    case GET -> Root => Ok("Hello World")
+    case GET -> Root          => Ok("Hello World")
+    case GET -> Root / "json" => Ok(Hello("World").asJson)
   }
 
   private val app: HttpApp[AppTask] = Router[AppTask](
