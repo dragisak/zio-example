@@ -24,3 +24,5 @@ libraryDependencies ++= List(
   "org.scalatest"  %% "scalatest"           % scalatestVersion % Test,
   "org.scalacheck" %% "scalacheck"          % scalacheckVersion % Test
 )
+
+mainClass := Some("dragisak.zio.Main")
