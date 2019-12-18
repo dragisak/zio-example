@@ -8,24 +8,29 @@ import org.http4s.server.blaze._
 import org.http4s.implicits._
 import org.http4s.server.Router
 import zio.interop.catz._
-import io.circe.syntax._
-import org.http4s.circe._
 
 object Main extends App {
 
   type AppEnvironment = zio.clock.Clock
   type AppTask[A]     = RIO[AppEnvironment, A]
 
-  val dsl: Http4sDsl[AppTask] = Http4sDsl[AppTask]
+  private val dsl: Http4sDsl[AppTask] = Http4sDsl[AppTask]
   import dsl._
 
-  private val service: HttpRoutes[AppTask] = HttpRoutes.of[AppTask] {
-    case GET -> Root          => Ok("Hello World")
-    case GET -> Root / "json" => Ok(Hello("World").asJson)
+  private val plainService = HttpRoutes.of[AppTask] {
+    case GET -> Root / "hello" / name => Ok(s"Hello $name")
+  }
+
+  private val jsonService: HttpRoutes[AppTask] = {
+    import org.http4s.circe.CirceEntityCodec._
+    HttpRoutes.of[AppTask] {
+      case GET -> Root / "hello" / name => Ok(Hello(s"World $name"))
+    }
   }
 
   private val app: HttpApp[AppTask] = Router[AppTask](
-    "/hello" -> service
+    "/plain" -> plainService,
+    "/json"  -> jsonService
   ).orNotFound
 
   override def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
@@ -36,9 +41,9 @@ object Main extends App {
         .serve
         .compile[AppTask, AppTask, ExitCode]
         .drain
-        .foldM(
-          _ => ZIO.succeed(1),
-          _ => ZIO.succeed(0)
+        .fold(
+          _ => 1,
+          _ => 0
         )
     }
   }
